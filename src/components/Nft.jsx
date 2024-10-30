@@ -2,30 +2,40 @@ import React, { useState } from "react";
 import { joinClasses } from "../helper";
 import { getNftMetadata } from "../services";
 import Search from "./Search";
+
 const Nft = () => {
     const [nftMetadata, setNftMetadata] = useState();
     const [inputValues, setInputValues] = useState({});
+    const [error, setError] = useState(null);
+
     const handleChange = (e) => {
         setInputValues({ ...inputValues, [e.target.name]: e.target.value });
     };
+
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!inputValues.nftAddress || !inputValues.tokenId) {
-            alert("Both fields are required ");
+            alert("Both fields are required");
             return;
         }
-        const _nftMetadata = await getNftMetadata(
-            inputValues.nftAddress.toString(),
-            inputValues.tokenId.toString()
-        );
-        console.log(_nftMetadata);
-        setNftMetadata(_nftMetadata);
+        try {
+            const _nftMetadata = await getNftMetadata(
+                inputValues.nftAddress.toString(),
+                inputValues.tokenId.toString()
+            );
+            setNftMetadata(_nftMetadata);
+            setError(null);
+        } catch (err) {
+            setError("Failed to fetch NFT metadata. Please try again.");
+            console.error(err);
+        }
     };
+
     return (
         <div>
-            <div className="text-center my-10 text-3xl">Search Nft</div>
+            <div className="text-center my-10 text-3xl">Search NFT</div>
             <p className="text-center">
-                Note: Only NFT listed on openSea is supported
+                Note: Only NFTs listed on OpenSea are supported
             </p>
             <form
                 onSubmit={handleSearch}
@@ -33,7 +43,7 @@ const Nft = () => {
             >
                 <input
                     type="text"
-                    placeholder="Nft Address"
+                    placeholder="NFT Address"
                     name="nftAddress"
                     onChange={handleChange}
                     className={joinClasses(
@@ -46,7 +56,7 @@ const Nft = () => {
                 />
                 <input
                     type="text"
-                    placeholder="Token Id"
+                    placeholder="Token ID"
                     name="tokenId"
                     onChange={handleChange}
                     className={joinClasses(
@@ -68,7 +78,8 @@ const Nft = () => {
                     )}
                 />
             </form>
-            {/* Display Nft */}
+            {error && <div className="text-red-500 text-center">{error}</div>}
+            {/* Display NFT */}
             {nftMetadata && (
                 <div
                     className={joinClasses(
@@ -82,10 +93,10 @@ const Nft = () => {
                     <img
                         className="object-contain"
                         src={nftMetadata.openSea.imageUrl}
-                        alt="Nft"
+                        alt="NFT"
                     />
-                    <div className="">
-                        Nft Address:{" "}
+                    <div>
+                        NFT Address:{" "}
                         <span className="text-blue-500">
                             {nftMetadata.address}
                         </span>
@@ -102,7 +113,7 @@ const Nft = () => {
                             {nftMetadata.openSea.floorPrice} ETH
                         </span>
                     </div>
-                    <div className="">
+                    <div>
                         Description:{" "}
                         <span className="text-gray-500">
                             {nftMetadata.openSea.description}
